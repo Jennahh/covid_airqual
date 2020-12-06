@@ -1,7 +1,7 @@
 **Estimating the causal effect of COVID-19 Lockdowns on Changes in Air Quality**
 
 
-**PM2.5 Code File for Final Paper 14.33 Fall 2020
+**SO2 Code File for Final Paper 14.33 Fall 2020
 **Code written by Jennah Haque, jhaque@Mit.edu
 
 
@@ -9,7 +9,7 @@
 ******************************
 ** Useful packages to install
 ******************************
-ssc install unique
+**ssc install unique
 ssc install fre
 ssc install binscatter
 ssc install estout, replace
@@ -32,12 +32,12 @@ cd "/Users/jennahhaque/Desktop/senior year/14.33/datasets for 14.33 final paper"
 
 
 *Loading lockdown and airqual csv file*
-import delimited "lockdown_3_pm25.csv"
+import delimited "lockdown_3_so2.csv"
 
 
 
 // saving dta file
-save "lockdown_3_pm25.dta", replace
+save "lockdown_3_so2.dta", replace
 
 
 **********************
@@ -52,36 +52,38 @@ save "lockdown_3_pm25.dta", replace
 	 tabulate day_since_lckdwn, generate (day_since_lckdwn_)
 	 
 	 **time fixed effects
-	 generate chng_pm = pm25_20-pm25_19
+	 generate chng_so2 = so2_20-so2_19
 	 
 	 
 	**EQN 1: Basic regression, no controls, cluster standard errors at the country level**
-	reg chng_pm day_since_lckdwn_*, cluster(country)
+	reg chng_so2 day_since_lckdwn_*, cluster(country)
 	
 	**EQN 2: Basic regression, country fixed effects, time fixed effects, cluster standard errors at the country level**
-	reg chng_pm day_since_lckdwn_* country_*, cluster(country)
+	reg chng_so2 day_since_lckdwn_* country_*, cluster(country)
 	estimates store m1, title(Basic Regression)
 	
 	
 	**EQN 3: Full regression. Country fixed effects, time fixed effects, controls for average death**
 	
-	reg chng_pm country_* avg_death_day pm25_19 day_since_lckdwn_*, cluster(country)
+	reg chng_so2 country_* avg_death_day so2_19 day_since_lckdwn_*, cluster(country)
 	estimates store m2, title(Regression with Time Fixed Effects)
 	
 	
 	**EQN 4: PLACEBO REGRESSION. See what would happen if the lockdown happened in 2019.
 	**Country fixed effects, time fixed effects, controls for average death**
 	
-	generate chng_pm_placebo = pm25_19-pm25_18
+	generate chng_so2_placebo = so2_19-so2_18
 	
-	reg chng_pm_placebo day_since_lckdwn_* country_* avg_death_day pm25_18, cluster(country)
+	reg chng_so2_placebo day_since_lckdwn_* country_* avg_death_day so2_18, cluster(country)
 	estimates store m3, title(Placebo Regresison)
 	
 	**panel event figure**
-	eventdd chng_pm pm25_19 avg_death_day country_*, timevar(day_since_lckdwn) ci(rcap) cluster(country) accum lags(20) leads(60) graph_op(title("Change in PM2.5, pre/post COVID-19 Lockdown") ytitle("Change in PM2.5 from 2019")) r
+	eventdd chng_so2 so2_19 avg_death_day country_*, timevar(day_since_lckdwn) ci(rcap) cluster(country) accum lags(20) leads(60) graph_op(title("Change in SO2, pre/post COVID-19 Lockdown") ytitle("Change in SO2: 2019-2020")) r
+	estimates store m15, title(CHNG_SO2)
 	
 	**panel event PLACEBO figure**
-	eventdd chng_pm_placebo pm25_18 avg_death_day country_*, timevar(day_since_lckdwn) ci(rcap) cluster(country) accum lags(20) leads(60) graph_op(title("Change in PM2.5, pre/post COVID-19 Lockdown") ytitle("Change in PM2.5: 2018-2019")) r
+	eventdd chng_so2_placebo so2_18 avg_death_day country_*, timevar(day_since_lckdwn) ci(rcap) cluster(country) accum lags(20) leads(60) graph_op(title("Change in SO2, Placebo Lockdown") ytitle("Change in SO2: 2018-2019")) r
+	estimates store m16, title(CHNG_SO2)
 	
 	
 	**EQN 5: see how results differ without the US with aggregating 
@@ -89,14 +91,12 @@ save "lockdown_3_pm25.dta", replace
 	keep in 1/5124
 	
 	**full regression
-	reg chng_pm country_* avg_death_day pm25_19 day_since_lckdwn_*, cluster(country)
+	reg chng_so2 day_since_lckdwn_* country_* avg_death_day so2_19, cluster(country)
 	estimates store m4, title(Regression with Time FE, no USA)
 	
 	**placebo regression**
-	reg chng_pm_placebo day_since_lckdwn_* country_* avg_death_day pm25_18, cluster(country)
+	reg chng_so2_placebo country_* avg_death_day so2_18 day_since_lckdwn_*, cluster(country)
 	estimates store m5, title(Placebo Regression, no USA)
-	
-	
 	
 	
 	
@@ -105,11 +105,6 @@ save "lockdown_3_pm25.dta", replace
 **Outputting the data
 **********************		
 	
-	**This will make Table 1**
+	**This will make Table 2**
 	
-	esttab m2 m3 using "table1.tex", keep (country_* avg_death_day pm25_19 day_since_lckdwn_93 day_since_lckdwn_94 day_since_lckdwn_95 day_since_lckdwn_96) cells(b(star fmt (3)) se(par fmt(2))) stats(N r2, labels("N" "R-squared") fmt(0 2)) starlevels( * 0.10 ** 0.05 *** 0.010) replace
-	
-	
-	
-	                                          
-	
+	esttab m15 m16 using "table2.tex", keep (country_* avg_death_day so2_19 day_since_lckdwn_93 day_since_lckdwn_94 day_since_lckdwn_95 day_since_lckdwn_96) cells(b(star fmt (3)) se(par fmt(2))) stats(N r2, labels("N" "R-squared") fmt(0 2)) starlevels( * 0.10 ** 0.05 *** 0.010) replace

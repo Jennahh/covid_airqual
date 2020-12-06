@@ -42,22 +42,23 @@ do so2.do
 
 
 ******************************
-** O3 Code (includes regression table)
+** O3 Code (includes regression tables and event study figures)
 ******************************
 
 do o3.do
 
 ******************************
-** Figures 1-3 (Lockdown Severity)
+** Figures 1 (Lockdown Severity)
 ******************************
 
-do fig13.do
+do fig1.do
 
 ******************************
-** Figures 4-6 (Death Count)
+** Figures 6 (Death Count)
 ******************************
 
-do fig46.do
+do fig4.do
+
 
 
 

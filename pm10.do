@@ -77,6 +77,14 @@ save "lockdown_3_pm10.dta", replace
 	reg chng_pm_placebo day_since_lckdwn_* country_* avg_death_day pm10_18, cluster(country)
 	estimates store m3, title(Placebo Regresison)
 	
+**panel event figure**
+	eventdd chng_pm pm10_19 avg_death_day country_*, timevar(day_since_lckdwn) ci(rcap) cluster(country) accum lags(20) leads(60) graph_op(title("Change in PM10, pre/post COVID-19 Lockdown") ytitle("Change in PM10: 2019-2020")) r
+	
+	**panel event PLACEBO figure**
+	eventdd chng_pm_placebo pm10_18 avg_death_day country_*, timevar(day_since_lckdwn) ci(rcap) cluster(country) accum lags(20) leads(60) graph_op(title("Change in PM10, Placebo Lockdown") ytitle("Change in PM10: 2018-2019")) r
+	
+	
+	
 	
 	**EQN 5: see how results differ without the US with aggregating 
 	
